@@ -1,0 +1,93 @@
+name: valet-testing/basic-pipeline-sample
+on:
+  push:
+  workflow_dispatch:
+concurrency:
+  group: "${{ github.ref }}"
+  cancel-in-progress: true
+env:
+  TEST: HELLOE
+  more: test
+jobs:
+  build_a:
+    runs-on: ubuntu-latest
+    container:
+      image: alpine
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v3.3.0
+      with:
+        fetch-depth: 50
+        lfs: true
+    - run: echo "This job builds something."
+  build_b:
+    runs-on: ubuntu-latest
+    container:
+      image: alpine
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v3.3.0
+      with:
+        fetch-depth: 50
+        lfs: true
+    - run: echo "This job builds something else."
+  test_a:
+    needs:
+    - build_a
+    - build_b
+    runs-on: ubuntu-latest
+    container:
+      image: alpine
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v3.3.0
+      with:
+        fetch-depth: 50
+        lfs: true
+    - run: echo "This job tests something. It will only run when all jobs in the"
+    - run: echo "build stage are complete."
+  test_b:
+    needs:
+    - build_a
+    - build_b
+    runs-on: ubuntu-latest
+    container:
+      image: alpine
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v3.3.0
+      with:
+        fetch-depth: 50
+        lfs: true
+    - run: echo "This job tests something else. It will only run when all jobs in the"
+    - run: echo "build stage are complete too. It will start at about the same time as test_a."
+  deploy_a:
+    needs:
+    - test_a
+    - test_b
+    runs-on: ubuntu-latest
+    container:
+      image: alpine
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v3.3.0
+      with:
+        fetch-depth: 50
+        lfs: true
+    - run: echo "This job deploys something. It will only run when all jobs in the"
+    - run: echo "test stage complete."
+  deploy_b:
+    needs:
+    - test_a
+    - test_b
+    runs-on: ubuntu-latest
+    container:
+      image: alpine
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v3.3.0
+      with:
+        fetch-depth: 50
+        lfs: true
+    - run: echo "This job deploys something else. It will only run when all jobs in the"
+    - run: echo "test stage complete. It will start at about the same time as deploy_a."
